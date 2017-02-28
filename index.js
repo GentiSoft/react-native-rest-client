@@ -54,5 +54,6 @@ export default class RestClient {
   GET (route, query) { return this._fetch(route, 'GET', query, true); }
   POST (route, body) { return this._fetch(route, 'POST', body); }
   PUT (route, body) { return this._fetch(route, 'PUT', body); }
+  PATCH (route, body) { return this._fetch(route, 'PATCH', body); }
   DELETE (route, query) { return this._fetch(route, 'DELETE', query, true); }
 }
