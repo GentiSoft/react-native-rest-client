@@ -40,14 +40,25 @@ export default class RestClient {
       Object.assign(opts, { body: JSON.stringify(body) });
     }
     const fetchPromise = () => fetch(fullRoute, opts);
+    function processResp(response){
+      if (response.ok) {
+        if (response.status==204) {
+          return {}
+        } else {
+          return response.json()
+        }
+      } else {
+        return {code:-1,message:response.statusText}
+      }
+    }
     if (this.devMode && this.simulatedDelay > 0) {
       // Simulate an n-second delay in every request
       return this._simulateDelay()
         .then(() => fetchPromise())
-        .then(response => response.json());
+        .then(response => processResp(response));
     } else {
       return fetchPromise()
-        .then(response => response.json());
+        .then(response => processResp(response));
     }
   }
 
