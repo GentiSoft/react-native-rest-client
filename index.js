@@ -48,18 +48,24 @@ export default class RestClient {
           return response.json()
         }
       } else {
-        return {code:-1,message:response.statusText}
+        __DEV__&&console.log(response)
+        return {code:response.status,message:response.statusText}
       }
     }
-    if (this.devMode && this.simulatedDelay > 0) {
-      // Simulate an n-second delay in every request
-      return this._simulateDelay()
-        .then(() => fetchPromise())
-        .then(response => processResp(response));
-    } else {
-      return fetchPromise()
-        .then(response => processResp(response));
-    }
+    return fetchPromise().then(response => processResp(response)).catch(e=>{
+      __DEV__&&console.log(e)
+      return {code:-1,message:e.message} 
+    })
+    // return fetchPromise().then(response => processResp(response));
+    // if (this.devMode && this.simulatedDelay > 0) {
+    //   // Simulate an n-second delay in every request
+    //   return this._simulateDelay()
+    //     .then(() => fetchPromise())
+    //     .then(response => processResp(response));
+    // } else {
+    //   return fetchPromise()
+    //     .then(response => processResp(response));
+    // }
   }
 
   GET (route, query) { return this._fetch(route, 'GET', query, true); }
