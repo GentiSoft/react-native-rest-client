@@ -4,7 +4,8 @@
   "description": "Your REST client for React Native made easy",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "./node_modules/.bin/eslint index.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,15 @@
   },
   "homepage": "https://github.com/javorosas/react-native-rest-client#readme",
   "dependencies": {
+    "http-status-codes": "^1.1.6",
     "qs": "^6.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.1.1",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1"
   }
 }
