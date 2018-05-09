@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/javorosas/react-native-rest-client#readme",
   "dependencies": {
+    "extendable-error": "^0.1.5",
     "http-status-codes": "^1.1.6",
     "qs": "^6.3.0"
   },

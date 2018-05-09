@@ -1,8 +1,8 @@
-
+import ExtendableError from 'extendable-error';
 import qs from 'qs';
 import HttpStatus from 'http-status-codes';
 
-class HTTPError extends Error {
+class HTTPError extends ExtendableError {
     constructor(code, msg = null, response = {}) {
         let statusText = HttpStatus.getStatusText(code);
 
@@ -11,27 +11,19 @@ class HTTPError extends Error {
         }
 
         super(msg);
-        this._code = parseInt(code, 10);
-        this._response = response;
+        this.code = parseInt(code, 10);
+        this.response = response;
         this.name = this.constructor.name;
 
         if (typeof Error.captureStackTrace === 'function') {
             Error.captureStackTrace(this, this.constructor);
-        } else { 
-            this.stack = (new Error(msg)).stack; 
+        } else {
+            this.stack = (new Error(msg)).stack;
         }
-    }
-
-    get code() {
-        return this._code;
     }
 
     get statusText() {
         return HttpStatus.getStatusText(this.code);
-    }
-
-    get response() {
-        return this._response;
     }
 }
 
@@ -60,24 +52,51 @@ export default class RestClient {
     return `${this.baseUrl}${url}`;
   }
 
-  _fetch (route, method, body, isQuery = false) {
+  _fetch (route, method = 'GET', body = null, options = {}) {
+    let customHeaders = options.headers || {},
+        isQuery = options.isQuery || false,
+        query = options.query || null;
+
     if (!route) throw new Error('Route is undefined');
     var fullRoute = this._fullRoute(route);
+
     if (isQuery && body) {
-      const query = qs.stringify(body);
-      fullRoute = `${fullRoute}?${query}`;
+      query = Object.assign({}, query || {}, body);
       body = undefined;
     }
+
+    if (query) {
+      fullRoute += `?${qs.stringify(query)}`;
+    }
+
+    const headers = Object.assign({}, this.headers, customHeaders);
+
     let opts = {
       method,
-      headers: this.headers
+      headers
     };
+
     if (body) {
-      Object.assign(opts, { body: JSON.stringify(body) });
+      switch (headers['Content-Type']) {
+        case 'application/json':
+          body = JSON.stringify(body);
+          break;
+        case 'text':
+        case 'text/plain':
+          if (typeof body !== 'string') {
+            body = body.toString();
+          }
+          break;
+        default:
+          throw Error(`Can't to cast ${headers['Content-Type']} Content-Type`);
+      }
     }
+
+    Object.assign(opts, { body });
+
     const fetchPromise = () => fetch(fullRoute, opts);
 
-    function processResp(response){
+    async function processResp(response){
       if (response.ok) {
 
           switch (response.status) {
@@ -88,8 +107,9 @@ export default class RestClient {
           }
 
       } else {
+		  const resp = await response.json();
         __DEV__ && console.log(response);
-        throw new HTTPError(response.status, response.statusText, response);
+        throw new HTTPError(response.status, response.statusText, resp);
       }
     }
 
@@ -111,9 +131,29 @@ export default class RestClient {
     return this;
   }
 
-  GET (route, query) { return this._fetch(route, 'GET', query, true); }
-  POST (route, body) { return this._fetch(route, 'POST', body); }
-  PUT (route, body) { return this._fetch(route, 'PUT', body); }
-  PATCH (route, body) { return this._fetch(route, 'PATCH', body); }
-  DELETE (route, query) { return this._fetch(route, 'DELETE', query, true); }
+  GET (route, query, options = {}) {
+    return this._fetch(route, 'GET', query, Object.assign(
+      { query: true },
+      options
+    ));
+  }
+
+  POST (route, body, options = {}) {
+    return this._fetch(route, 'POST', body, options);
+  }
+
+  PUT (route, body, options = {}) {
+    return this._fetch(route, 'PUT', body, options);
+  }
+
+  PATCH (route, body, options = {}) {
+    return this._fetch(route, 'PATCH', body, options);
+  }
+
+  DELETE (route, query, options = {}) {
+    return this._fetch(route, 'DELETE', query, Object.assign(
+      { query: true },
+      options
+    ));
+  }
 }
