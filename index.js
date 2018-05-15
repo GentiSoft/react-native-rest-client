@@ -87,6 +87,10 @@ export default class RestClient {
             body = body.toString();
           }
           break;
+        case 'multipart/form-data':
+          let nbody = new FormData();
+          Object.keys(body).forEach((k) => nbody.append(k, body[k]));
+          body = nbody;
         default:
           throw Error(`Can't to cast ${headers['Content-Type']} Content-Type`);
       }
