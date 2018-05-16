@@ -91,6 +91,8 @@ export default class RestClient {
           let nbody = new FormData();
           Object.keys(body).forEach((k) => nbody.append(k, body[k]));
           body = nbody;
+          delete opts.headers['Content-Type'];
+          break;
         default:
           throw Error(`Can't to cast ${headers['Content-Type']} Content-Type`);
       }
