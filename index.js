@@ -65,7 +65,7 @@ export default class RestClient {
       body = undefined;
     }
 
-    if (query) {
+    if (query && Object.keys(query).length) {
       fullRoute += `?${qs.stringify(query)}`;
     }
 
