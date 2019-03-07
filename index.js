@@ -139,7 +139,7 @@ export default class RestClient {
 
   GET (route, query, options = {}) {
     return this._fetch(route, 'GET', query, Object.assign(
-      { query: true },
+        { isQuery: true },
       options
     ));
   }
@@ -158,7 +158,7 @@ export default class RestClient {
 
   DELETE (route, query, options = {}) {
     return this._fetch(route, 'DELETE', query, Object.assign(
-      { query: true },
+      { isQuery: true },
       options
     ));
   }
